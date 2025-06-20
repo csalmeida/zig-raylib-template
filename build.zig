@@ -65,6 +65,18 @@ pub fn build(b: *std.Build) void {
         .root_module = exe_mod,
     });
 
+    // Get the raylib dependency
+    const raylib_dep = b.dependency("raylib_zig", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    // Add raylib as an import to your exe_mod
+    exe_mod.addImport("raylib", raylib_dep.module("raylib"));
+
+    // Link the raylib library
+    exe.linkLibrary(raylib_dep.artifact("raylib"));
+
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
     // step when running `zig build`).

@@ -1,46 +1,30 @@
-//! By convention, main.zig is where your main function lives in the case that
-//! you are building an executable. If you are making a library, the convention
-//! is to delete this file and start with root.zig instead.
+const std = @import("std");
+const rl = @import("raylib");
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    // Print a message to the console
+    std.debug.print("Zig & Raylib Template Starting...\n", .{});
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    // Initialize the window with a title
+    rl.initWindow(1024, 768, "Zig & Raylib");
+    defer rl.closeWindow(); // when fn returns, closeWindow is called
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    // Set target FPS to avoid excessive updates
+    rl.setTargetFPS(60);
 
-    try bw.flush(); // Don't forget to flush!
+    // Main loop
+    while (!rl.windowShouldClose()) {
+        rl.beginDrawing();
+        defer rl.endDrawing(); // when fn returns, endDrawing is called
+
+        // Clear the screen with black color
+        rl.clearBackground(.black);
+
+        // Draw text in the center of the screen on top of the black background
+        const text_size = 16 * 2;
+        rl.drawText("Zig & Raylib", @divExact(rl.getScreenWidth(), 2) - 100, @divExact(rl.getScreenHeight(), 2) - 25, text_size, .white);
+
+        // Show FPS for debugging
+        rl.drawFPS(rl.getScreenWidth() - 90, rl.getScreenHeight() - 30);
+    }
 }
-
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // Try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
-}
-
-test "use other module" {
-    try std.testing.expectEqual(@as(i32, 150), lib.add(100, 50));
-}
-
-test "fuzz example" {
-    const Context = struct {
-        fn testOne(context: @This(), input: []const u8) anyerror!void {
-            _ = context;
-            // Try passing `--fuzz` to `zig build test` and see if it manages to fail this test case!
-            try std.testing.expect(!std.mem.eql(u8, "canyoufindme", input));
-        }
-    };
-    try std.testing.fuzz(Context{}, Context.testOne, .{});
-}
-
-const std = @import("std");
-
-/// This imports the separate module containing `root.zig`. Take a look in `build.zig` for details.
-const lib = @import("zig_raylib_template_lib");
